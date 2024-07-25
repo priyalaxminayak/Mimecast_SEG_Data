@@ -1,25 +1,32 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "FunctionName": {
-            "defaultValue": "MimecastSEG",
+            "defaultValue": "MimecastAT",
             "minLength": 1,
             "maxLength": 11,
             "type": "string"
         },
-        "MimecastBaseURL": {
+        "WorkspaceID": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "Enter Workspace ID of Log Analytics workspace"
+            }
+        },
+        "WorkspaceKey": {
+            "type": "securestring",
+            "minLength": 1,
+            "metadata": {
+                "description": "Enter Workspace Key of Log Analytics workspace"
+            }
+        },
+        "BaseURL": {
             "defaultValue": "https://api.services.mimecast.com",
             "type": "string",
             "metadata": {
-                "description": "Enter Base URL of Mimecast API 2.0 (e.g. https://api.services.mimecast.com)"
-            }
-        },
-        "StartDate":{
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "Data retrieval will begin from the specified Start Date (Formate : yyyy-mm-dd)"
+                "description": "Enter Base URL of Mimecast API (e.g. https://api.services.mimecast.com)"
             }
         },
         "MimecastClientID": {
@@ -36,28 +43,6 @@
                 "description": "Enter Mimecast Client Secret for authentication"
             }
         },
-        "Schedule": {
-            "type": "string",
-            "minLength": 11,
-            "defaultValue": "0 */30 * * * *",
-            "metadata": {
-                "description": "Please enter a valid Quartz cron-expression. (Example: 0 0 0 * * *)"
-            }
-        },
-        "WorkspaceID": {
-            "type": "string",
-            "minLength": 1,
-            "metadata": {
-                "description": "Enter Workspace ID of Log Analytics workspace"
-            }
-        },
-        "WorkspaceKey": {
-            "type": "securestring",
-            "minLength": 1,
-            "metadata": {
-                "description": "Enter Workspace Key of Log Analytics workspace"
-            }
-        },
         "LogLevel": {
             "type": "string",
             "metadata": {
@@ -70,6 +55,14 @@
                 "Warning"
             ],
             "defaultValue": "Info"
+        },
+        "Schedule": {
+            "type": "string",
+            "minLength": 11,
+            "metadata": {
+                "description": "Please enter a valid Quartz cron-expression. (Example: 0 0 0 * * *)"
+            },
+            "defaultValue": "0 0 */1 * * *"
         },
         "AppInsightsWorkspaceResourceID": {
             "type": "string",
@@ -204,17 +197,14 @@
                         "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('microsoft.insights/components', variables('FunctionName')), '2015-05-01').ConnectionString]",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(variables('FunctionName')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(variables('FunctionName'))), '2019-06-01').keys[0].value, ';EndpointSuffix=',toLower(variables('StorageSuffix')))]",
                         "logAnalyticsUri": "[variables('LogAnaltyicsUri')]",
-                        "Workspace_Id": "[trim(parameters('WorkspaceID'))]",
-                        "Workspace_Key": "[trim(parameters('WorkspaceKey'))]",
-                        "BaseURL": "[trim(parameters('MimecastBaseURL'))]",
-                        "Mimecast_client_id": "[trim(parameters('MimecastClientID'))]",
-                        "Mimecast_client_secret": "[trim(parameters('MimecastClientSecret'))]",
-                        "File_Share_Name": "mimecast-checkpoints",
+                        "WorkspaceID": "[trim(parameters('WorkspaceID'))]",
+                        "WorkspaceKey": "[trim(parameters('WorkspaceKey'))]",
+                        "BaseURL": "[trim(parameters('BaseURL'))]",
+                        "MimecastClientID": "[trim(parameters('MimecastClientID'))]",
+                        "MimecastClientSecret": "[trim(parameters('MimecastClientSecret'))]",
                         "Schedule": "[trim(parameters('Schedule'))]",
-                        "Start_Date": "[trim(parameters('StartDate'))]",
                         "LogLevel": "[trim(parameters('LogLevel'))]",
-                        "Connection_String": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(variables('FunctionName')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(variables('FunctionName'))), '2019-06-01').keys[0].value, ';EndpointSuffix=',toLower(variables('StorageSuffix')))]",
-                        "WEBSITE_RUN_FROM_PACKAGE": "https://github.com/fenil-savani/Infoblox-Data-Connector/raw/main/Mimecast/MimecastSEG.zip"
+                        "WEBSITE_RUN_FROM_PACKAGE": "https://aka.ms/sentinel-MimecastAT-functionapp"
                     }
                 }
             ]
